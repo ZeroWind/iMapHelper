@@ -74,6 +74,34 @@ init_vault() {
     fi
 }
 
+
+# --- NEW: UNINSTALL FUNCTION ---
+generate_uninstall_cmd() {
+    echo -e "\n${RED}‼️  DANGER ZONE: UNINSTALL iMapHelper${NC}"
+    echo -e "${YELLOW}This will generate commands to REMOVE ALL MODELS and configuration.${NC}"
+    echo -e "Are you absolutely sure? (y/n)"
+    read -p ">>> " CONFIRM
+    
+    if [ "$CONFIRM" == "y" ]; then
+        echo -e "\n${BLUE}----------------------------------------------------${NC}"
+        echo -e "${RED}Copy and execute the following commands to UNINSTALL:${NC}\n"
+        
+        echo -e "# 1. Remove all physical model files (IRREVERSIBLE!)"
+        echo "sudo rm -rf \"$VAULT\""
+        
+        echo -e "\n# 2. Clean up environment variables (Manual step)"
+        echo "sed -i '/HF_HOME/d' ~/.bashrc"
+        echo "sed -i '/MODELSCOPE_CACHE/d' ~/.bashrc"
+        echo "sed -i '/# AI Model Cache Redirect/d' ~/.bashrc"
+        
+        echo -e "\n${YELLOW}Note: After execution, run 'source ~/.bashrc' to refresh environment.${NC}"
+        echo -e "${BLUE}----------------------------------------------------${NC}"
+    else
+        echo -e "${GREEN}Uninstall cancelled.${NC}"
+    fi
+}
+
+
 # 3. 映射路径生成
 generate_mapping() {
     if [ ! -d "$VAULT/base" ]; then
@@ -115,7 +143,7 @@ while true; do
     echo -e "操作:"
     echo "1)修复/初始化仓库"
     echo "2)映射指令"
-    echo "3)刷新"
+    echo "3)生成卸载指令"
     echo "q)退出"
     read -p ">>> " MAIN_OPT
 
@@ -129,7 +157,7 @@ while true; do
             read -p "Press Enter to continue..." 
             ;;
         3) 
-            # Just loop back to show_tree
+            generate_uninstall_cmd; read -p "Press Enter..."
             ;;
         q) 
             echo -e "${GREEN}Goodbye!${NC}"
