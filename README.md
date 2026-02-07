@@ -3,9 +3,20 @@
 
 这是一个模型存储治理工具。它通过“中心化存储 + 逻辑映射”的方案，解决了多用户环境下模型重复下载、系统盘空间爆满以及 Docker 容器路径挂载繁琐等痛点。
 
-简单使用: 规划模型存放路径 -> 复制原始路径 -> 粘贴 -> 复制使用 (不直接运行, 而是粘贴到需要的配置文件中使用)
-卸载: 脚本不直接运行 rm -rf，而是把命令打印出来。 (请自行在终端上执行删除指令)
+```text
+维度		管理助手已解决;			
+存储层	物理路径规划、缓存归类;
+映射层	软链接、Docker -v 挂载指令预览	;
+权限层	chmod 775 基础设置. 
+```
+
+* 使用: 模型存储路径 -> 复制软链接指令在终端执行 (不直接运行), 或作为 Docker 的模型存储存储路径配置
+* 卸载: 脚本不直接运行 rm -rf，而是把命令打印出来。 (请自行在终端上执行删除指令)
+
 ---
+
+## 更新
+v0.02 增加已有模型转移到中心存储仓库的指令
 
 ## ✨ 核心特性
 
@@ -29,7 +40,7 @@
 │   ├── diffusion  # 绘图模型原生权重 (如 Flux, SD3)
 │   └── vlm        # 多模态模型 (如 Qwen-VL)
 ├── lora           # 微调权重文件
-├── tensorrt       # GB10 专用的 TensorRT-LLM/Engine 引擎
+├── tensorrt       # TensorRT-LLM/Engine 引擎专用
 └── cache          # 统一的 HuggingFace / ModelScope 缓存
 
 ```
@@ -60,7 +71,7 @@ chmod +x imaphelper.sh
 
 1. 输入你想在代码里调用的“引用路径”（如 `/home/user/ComfyUI/models/checkpoints/flux.sft`）。
 2. 选择物理分类。
-3. **直接复制** 生成的 `ln -s`（本地）或 `-v`（Docker）指令。
+3. **直接复制** 生成的 `ln -s`（本地）或 `-v`（Docker）指令, 进而执行或用于 Docker 配置。
 
 ---
 
@@ -92,5 +103,5 @@ docker run --gpus all \
 * **数据无损**：初始化逻辑使用 `mkdir -p`，若目录已存在模型文件，**绝不会**被删除或覆盖。
 * **权限位 (GID)**：脚本对目录设置了 `s` 位权限，确保不同用户、不同容器产生的新模型文件都能被属组内的成员共同读写，避免了 Linux 权限冲突。
 * **卸载: 生成指令, 复制到终端执行**
-![iMap-Helper](https://github.com/user-attachments/assets/1cc1a496-1384-4800-95d9-3d1ce34d67c5)
+![iMap-Helper](https://github.com/user-attachments/assets/1cc1a496-1384-4800-95d9-3d1ce34d67c5) 
 ---
