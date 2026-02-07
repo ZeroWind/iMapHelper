@@ -57,6 +57,23 @@ show_tree() {
     echo -e "${BLUE}----------------------------------------------------${NC}"
 }
 
+
+check_vault_integrity() {
+    local required_dirs=("base/llm" "base/diffusion" "base/vlm" "lora" "tensorrt" "cache")
+    
+    if [ ! -d "$VAULT" ]; then
+        return 1
+    fi
+
+    for dir in "${required_dirs[@]}"; do
+        if [ ! -d "$VAULT/$dir" ]; then
+            return 1 
+        fi
+    done
+
+    return 0 
+}
+
 # 2. Safety Initialization
 init_vault() {
     echo -e "${YELLOW}[Initializing/Repairing Vault...]${NC}"
@@ -82,6 +99,13 @@ init_vault() {
 
 # 3. Path Mapping Helper
 generate_mapping() {
+
+	if ! check_vault_integrity; then
+        echo -e "${RED}⚠️ Warning: The repository is not ready, Please execute option [1] first.${NC}"
+        read -p "Press Enter..."
+        return
+    fi
+
     echo -e "\n${YELLOW}[Path Mapping Helper]${NC}"
     read -p "Enter Target Path (e.g., /app/models/my_model): " INPUT_PATH
     echo -e "Category: [1]LLM [2]Diff [3]VLM [4]LoRA [5]TRT"
@@ -114,6 +138,14 @@ generate_mapping() {
 
 # 4. Model Import/Migration
 import_model() {
+
+	if ! check_vault_integrity; then
+        echo -e "${RED}❌ Error: The model repository structure is incomplete or has not been initialized.${NC}"
+        echo -e "${YELLOW}Please return to the main menu and select option [1]${NC}"
+        read -p "Press Enter..." 
+        return
+    fi
+
     echo -e "\n${YELLOW}[Model Migration Tool]${NC}"
     read -e -p "Enter current source path: " SRC_PATH
     [ ! -e "$SRC_PATH" ] && { echo -e "${RED}❌ Source not found.${NC}"; return; }
@@ -140,6 +172,14 @@ import_model() {
 
 # 5. DGX / High Performance Docker Template
 generate_docker_template() {
+
+	if ! check_vault_integrity; then
+        echo -e "${RED}❌ Error: The model repository structure is incomplete or has not been initialized.${NC}"
+        echo -e "${YELLOW}Please return to the main menu and select option [1]${NC}"
+        read -p "Press Enter..." 
+        return
+    fi
+	
     echo -e "\n${YELLOW}[DGX / High Performance Docker Template]${NC}"
     read -p "Enter Image Name (Default: nvcr.io/nvidia/pytorch:24.01-py3): " DOCKER_IMAGE
     DOCKER_IMAGE=${DOCKER_IMAGE:-"nvcr.io/nvidia/pytorch:24.01-py3"}

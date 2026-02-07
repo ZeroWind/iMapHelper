@@ -55,6 +55,27 @@ show_tree() {
     echo -e "${BLUE}----------------------------------------------------${NC}"
 }
 
+
+# 校验仓库完整性函数
+# 返回值: 0 (正常), 1 (目录不完整)
+check_vault_integrity() {
+    local required_dirs=("base/llm" "base/diffusion" "base/vlm" "lora" "tensorrt" "cache")
+    
+    # 首先检查根目录
+    if [ ! -d "$VAULT" ]; then
+        return 1
+    fi
+
+    # 遍历检查子目录
+    for dir in "${required_dirs[@]}"; do
+        if [ ! -d "$VAULT/$dir" ]; then
+            return 1 # 发现任何一个目录缺失，立即返回失败
+        fi
+    done
+
+    return 0 # 全部通过
+}
+
 # 2. 安全初始化
 init_vault() {
     echo -e "${YELLOW}[正在初始化模型仓库结构...]${NC}"
@@ -74,6 +95,15 @@ init_vault() {
 
 # 3. 映射路径生成
 generate_mapping() {
+
+	# 直接调用封装好的函数
+    if ! check_vault_integrity; then
+        echo -e "${RED}❌ 错误: 模型仓库结构不完整或尚未初始化。${NC}"
+        echo -e "${YELLOW}请返回主菜单，先选择选项 [1] 进行环境初始化/修复。${NC}"
+        read -p "按回车键返回..." 
+        return
+    fi
+
     echo -e "\n${YELLOW}[路径映射(软链/挂载)助手]${NC}"
     read -p "请输入应用引用的目标路径: " INPUT_PATH
     echo -e "物理分类: [1]LLM [2]Diff [3]VLM [4]LoRA [5]TRT"
@@ -100,6 +130,15 @@ generate_mapping() {
 
 # 4. 模型入库 (核心更新：输出指令供用户选择)
 import_model() {
+	
+	# 直接调用封装好的函数
+    if ! check_vault_integrity; then
+        echo -e "${RED}❌ 错误: 模型仓库结构不完整或尚未初始化。${NC}"
+        echo -e "${YELLOW}请返回主菜单，先选择选项 [1] 进行环境初始化/修复。${NC}"
+        read -p "按回车键返回..." 
+        return
+    fi
+	
     echo -e "\n${YELLOW}[模型入库搬运助手]${NC}"
     read -e -p "请输入当前模型的完整路径 (支持 Tab 补全): " SRC_PATH
     
@@ -167,6 +206,15 @@ generate_uninstall_cmd() {
 
 # 6. 生成针对 DGX 优化的 Docker 模板
 generate_docker_template() {
+
+	# 直接调用封装好的函数
+    if ! check_vault_integrity; then
+        echo -e "${RED}❌ 错误: 模型仓库结构不完整或尚未初始化。${NC}"
+        echo -e "${YELLOW}请返回主菜单，先选择选项 [1] 进行环境初始化/修复。${NC}"
+        read -p "按回车键返回..." 
+        return
+    fi
+
     echo -e "\n${YELLOW}[DGX 🐳 容器化启动模板生成]${NC}"
 	echo -e "💻  ${CYAN} 兼容性: DGX A100/H100 / RTX / Spark on GPU ${NC}"
     read -p "请输入你要使用的镜像名称 (默认: nvcr.io/nvidia/pytorch:24.01-py3): " DOCKER_IMAGE
@@ -203,7 +251,15 @@ generate_docker_template() {
 while true; do
     clear
     show_header
-    show_tree
+	show_tree
+	# 在主菜单实时显示仓库状态
+    #if check_vault_integrity; then
+    #   echo -e "仓库状态: ${GREEN}● 已就绪 (Ready)${NC}"
+    #else
+    #   echo -e "仓库状态: ${RED}○ 未初始化/不完整 (Not Initialized)${NC}"
+    #fi
+	
+
     echo -e "请选择操作:"
     echo "1) 🚀 修复/初始化仓库与环境"
     echo "2) 🔗 生成软链接与映射指令"
