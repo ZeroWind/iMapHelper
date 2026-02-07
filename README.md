@@ -1,114 +1,35 @@
-
-# 🚀  AI 推理模型中心化仓库管理助手 (iMap-Helper)
-
-这是一个模型存储治理工具。它通过“中心化存储 + 逻辑映射”的方案，解决了多用户环境下模型重复下载、系统盘空间爆满以及 Docker 容器路径挂载繁琐等痛点。
-
-- 模型（Checkpoints/LoRA/VAE）—— 尽情使用软链接。 
-- 运行环境（venv/bin/site-packages）—— 保持物理真实，拒绝链接。
-
-
-|维度	|管理助手已解决|
-|-------|------------ |
-|存储层	|物理路径规划、缓存归类, 模型转移;|
-|映射层	|软链接、Docker -v 挂载指令预览;|
-|权限层	|chmod 775 基础设置. |
-
-
-- 使用: 模型存储路径 -> 复制软链接指令在终端执行 (不直接运行), 或作为 Docker 的模型存储存储路径配置
-- 卸载: 脚本不直接运行 rm -rf，而是把命令打印出来。 (请自行在终端上执行删除指令)
-
----
-
-## 更新
-v0.02 增加已有模型转移到推理模型中心化存储仓库的指令
-v0.03 生成 Docker 专门针对 DGX 优化的模板配置
-
-## 📂 推荐目录结构
-
-脚本将根据以下逻辑初始化你的存储空间：
-
-```text
-/mnt/models (或你的挂载点)
-├── base
-│   ├── llm        # 语言模型原生权重 (如 Llama 3)
-│   ├── diffusion  # 绘图模型原生权重 (如 Flux, SD3)
-│   └── vlm        # 多模态模型 (如 Qwen-VL)
-├── lora           # 微调权重文件
-├── tensorrt       # TensorRT-LLM/Engine 引擎专用
-└── cache          # 统一的 HuggingFace / ModelScope 缓存
-
-```
-
----
-
-## ✨ 核心特性
-
-* **📦 统一仓储**：构建标准的目录结构，涵盖 LLM、Diffusion、VLM、LoRA 和 TensorRT。
-* **🛡️ 系统盘保护**：自动重定向 HuggingFace 和 ModelScope 缓存路径到数据盘，防止 `/home` 目录溢出。
-* **🔗 智能映射**：一键生成适用于 **本地 Python 环境 (软链接)** 和 **Docker 容器 (挂载参数)** 的部署指令。
-* **🦾 Blackwell 优化**：专门预留 `tensorrt` 目录，用于存放针对 NVIDIA NIM 优化的 FP4/FP8 推理引擎。
-* **✅ 安全加固**：初始化采用“无损修复”逻辑，不覆盖已有模型；权限自动适配多用户协作与容器访问。
-* **📊 健康监控**：实时显示仓库完整性、物理树状结构及缓存占用大小。
-* **🐳 针对性优化** 生成 DGX A100/H100/Spark GPU 优化的 Docker 启动指令
----
-
+### 🇺🇸 English Version: iMap-Helper QuickStart
 ![iMap-Helper](https://github.com/user-attachments/assets/1cc1a496-1384-4800-95d9-3d1ce34d67c5) 
 
-## 🛠️ 安装与使用
+#### **1. Core Concept**
 
-### 1. 快速安装
+* **Models**: Centralized storage + Logical mapping (Symlink/Volume Mount).
+* **Environments**: Keep `venv` physically intact; avoid symlinks for runtime libs.
 
-将脚本下载到本地并赋予执行权限：
+#### **2. Key Features**
 
-```bash
-chmod +x imaphelper.sh
+* **Standardized Vault**: Unified structure for LLM, Diffusion, VLM, LoRA, and TensorRT.
+* **OS Drive Protection**: Force-redirects HF/ModelScope cache to data disks.
+* **Seamless Mapping**: Generates local `ln -s` commands and Docker `-v` parameters.
+* **Compute Optimized**: High-performance Docker templates for DGX (A100/H100/Spark).
 
-```
+#### **3. Workflow**
 
-### 2. 初始化环境
+1. **Initialize**: Run Option `[1]` to setup directories and fix permissions.
+2. **Activate**: Run `source ~/.bashrc` in your terminal.
+3. **Map Models**: Run Option `[2]` and copy-paste the generated commands.
+4. **Import**: Run Option `[3]` to migrate existing models into the vault.
 
-第一次使用时，请运行脚本并选择选项 **[1]**：
+#### **4. Directory Structure**
 
-* **动作**：创建目录、修复权限、注入环境变量。
-* **注意**：完成后请执行 `source ~/.bashrc` 使缓存重定向生效。
-
-### 3. 生成映射指令
-
-当需要部署模型时，选择选项 **[2]**：
-
-1. 输入你想在代码里调用的“引用路径”（如 `/home/user/ComfyUI/models/checkpoints/flux.sft`）。
-2. 选择物理分类。
-3. **直接复制** 生成的 `ln -s`（本地）或 `-v`（Docker）指令, 进而执行或用于 Docker 配置。
-
----
-
-## 💡 典型应用场景
-
-### 场景 A：保护系统盘免受 HF 缓存侵害
-
-脚本会将 `HF_HOME` 指向数据盘。
-
-> **结果**：当你运行 `from_pretrained("model_id")` 时，几十 GB 的数据会直接进入 cache 目录。
-
-### 场景 B：Docker 容器推理
-
-在部署 NVIDIA NIM 或 vLLM 容器时，使用生成的方案 B 参数：
-
-```bash
-# 脚本生成的输出示例：
-docker run --gpus all \
-  -v "/mnt/models/base/llm/Llama3-8B":"/models/Llama3" \
-  -v "/mnt/models/cache":"/root/.cache/huggingface" \
-  nvidia/nim:latest
+```text
+/mnt/models (Vault Root)
+├── base		   # Foundation Models
+│   ├── llm        # (Llama 3)
+│   ├── diffusion  # (Flux, SD3)
+│   └── vlm        # (Qwen-VL)
+├── lora           # LoRA Weights
+├── tensorrt       # Optimized Engines
+└── cache          # Unified HF/ModelScope Cache
 
 ```
-
----
-
-## ⚠️ 安全说明
-
-* **数据无损**：初始化逻辑使用 `mkdir -p`，若目录已存在模型文件，**绝不会**被删除或覆盖。
-* **权限位 (GID)**：脚本对目录设置了 `s` 位权限，确保不同用户、不同容器产生的新模型文件都能被属组内的成员共同读写，避免了 Linux 权限冲突。
-* **卸载(删除路径): 生成指令, 复制到终端执行**
-
----
