@@ -13,7 +13,7 @@ NC='\033[0m'
 
 show_header() {
     echo -e "${BLUE}====================================================${NC}"
-    echo -e "🧠  ${GREEN} AI Storage Manager (Global Edition)${NC}"
+    echo -e "🧠  ${GREEN} AI Storage Manager ${NC}"
     echo -e "${BLUE}====================================================${NC}"
 }
 
@@ -21,7 +21,7 @@ show_header() {
 show_tree() {
     echo -e "${YELLOW}[Current Vault Structure]${NC}"
     if [ ! -d "$VAULT" ]; then
-        echo -e "${RED}⚠️  Warning: Root directory $VAULT not found!${NC}"
+        echo -e "${RED}⚠️  Warning: Root directory $VAULT not found! Run option [1] ${NC}"
         return
     fi
     
@@ -115,12 +115,39 @@ generate_mapping() {
     echo -e "${BLUE}----------------------------------------------------${NC}"
 }
 
-# --- Main Menu ---
-show_header
-show_tree
+# --- Main Logic Loop ---
+# Use a loop to keep the script running until the user chooses to quit
+while true; do
+    clear
+    show_header
+    show_tree
 
-echo "Action: 1)Init/Repair  2)Map Path  3)Refresh  q)Quit"
-read -p ">>> " MAIN_OPT
-case $MAIN_OPT in
-    1) init_vault ;; 2) generate_mapping ;; 3) clear; show_header; show_tree ;; q) exit 0 ;;
-esac
+    echo -e "Select Action:"
+    echo "1) Init/Repair Vault & Env"
+    echo "2) Generate Mapping Command"
+    echo "3) Refresh View"
+    echo "q) Quit"
+    read -p ">>> " MAIN_OPT
+
+    case $MAIN_OPT in
+        1) 
+            init_vault 
+            read -p "Press Enter to continue..." # Pause to let user see the result
+            ;;
+        2) 
+            generate_mapping 
+            read -p "Press Enter to continue..." 
+            ;;
+        3) 
+            # Just loop back to show_tree
+            ;;
+        q) 
+            echo -e "${GREEN}Goodbye!${NC}"
+            exit 0 
+            ;;
+        *) 
+            echo -e "${RED}Invalid option${NC}"
+            sleep 1
+            ;;
+    esac
+done

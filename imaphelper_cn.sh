@@ -12,7 +12,7 @@ NC='\033[0m'
 
 show_header() {
     echo -e "${BLUE}====================================================${NC}"
-    echo -e "🧠  ${GREEN} AI 模型存储管理助手 (安全加固版)${NC}"
+    echo -e "🧠  ${GREEN} AI 模型存储管理助手 ${NC}"
     echo -e "${BLUE}====================================================${NC}"
 }
 
@@ -20,7 +20,7 @@ show_header() {
 show_tree() {
     echo -e "${YELLOW}[当前仓库物理结构]${NC}"
     if [ ! -d "$VAULT" ]; then
-        echo -e "${RED}⚠️ 警告: 根目录 $VAULT 不存在！${NC}"
+        echo -e "${RED}⚠️ 警告: 根目录 $VAULT 不存在！请运行选项 [1] ${NC}"
         return
     fi
     
@@ -106,11 +106,38 @@ generate_mapping() {
 }
 
 # --- 主逻辑 ---
-show_header
-show_tree
+# Use a loop to keep the script running until the user chooses to quit
+while true; do
+    clear
+    show_header
+    show_tree
 
-echo "操作: 1)修复/初始化仓库  2)映射指令  3)刷新  q)退出"
-read -p ">>> " MAIN_OPT
-case $MAIN_OPT in
-    1) init_vault ;; 2) generate_mapping ;; 3) clear; show_header; show_tree ;; q) exit 0 ;;
-esac
+    echo -e "操作:"
+    echo "1)修复/初始化仓库"
+    echo "2)映射指令"
+    echo "3)刷新"
+    echo "q)退出"
+    read -p ">>> " MAIN_OPT
+
+    case $MAIN_OPT in
+        1) 
+            init_vault 
+            read -p "Press Enter to continue..." # Pause to let user see the result
+            ;;
+        2) 
+            generate_mapping 
+            read -p "Press Enter to continue..." 
+            ;;
+        3) 
+            # Just loop back to show_tree
+            ;;
+        q) 
+            echo -e "${GREEN}Goodbye!${NC}"
+            exit 0 
+            ;;
+        *) 
+            echo -e "${RED}Invalid option${NC}"
+            sleep 1
+            ;;
+    esac
+done
