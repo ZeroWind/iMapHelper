@@ -164,6 +164,41 @@ generate_uninstall_cmd() {
     fi
 }
 
+
+# 6. 生成针对 DGX 优化的 Docker 模板
+generate_docker_template() {
+    echo -e "\n${YELLOW}[DGX 🐳 容器化启动模板生成]${NC}"
+	echo -e "💻  ${CYAN} 兼容性: DGX A100/H100 / RTX / Spark on GPU ${NC}"
+    read -p "请输入你要使用的镜像名称 (默认: nvcr.io/nvidia/pytorch:24.01-py3): " DOCKER_IMAGE
+    DOCKER_IMAGE=${DOCKER_IMAGE:-"nvcr.io/nvidia/pytorch:24.01-py3"}
+    
+    # 获取宿主机用户信息，用于解决权限污染
+    local CURRENT_UID=$(id -u)
+    local CURRENT_GID=$(id -g)
+    
+    echo -e "\n${GREEN}🚀 针对 DGX 环境优化的启动指令：${NC}"
+    echo -e "${BLUE}----------------------------------------------------${NC}"
+    echo "docker run -it --rm \\"
+    echo "    --gpus all \\"
+    echo "    --shm-size=16g \\"  # 关键：防止 DataLoader 导致共享内存溢出
+    echo "    --ulimit memlock=-1 \\"
+    echo "    --ulimit stack=67108864 \\"
+    echo "    --user $CURRENT_UID:$CURRENT_GID \\"  # 关键：对齐宿主机权限
+    echo "    -v \"$VAULT/cache\":\"/root/.cache/huggingface\" \\"
+    echo "    -v \"$VAULT\":\"$VAULT\" \\"  # 推荐：镜像内也使用相同的绝对路径
+    echo "    -e HF_HOME=\"$VAULT/cache\" \\"
+    echo "    -e HF_ENDPOINT=https://hf-mirror.com \\" # 境内加速
+    echo "    $DOCKER_IMAGE /bin/bash"
+    echo -e "${BLUE}----------------------------------------------------${NC}"
+    
+    echo -e "${CYAN}💡 优化点解析：${NC}"
+    echo -e "1. ${WHITE}--shm-size${NC}: DGX 训练必须设置，否则多线程读取数据会崩溃。"
+    echo -e "2. ${WHITE}--user${NC}: 确保容器内生成的文件，你在宿主机能直接移动/删除。"
+    echo -e "3. ${WHITE}--gpus all${NC}: 激活 NVIDIA 运行时环境。"
+    echo -e "4. ${WHITE}路径一致性${NC}: 建议容器内路径与宿主机完全一致，避免模型配置文件里的路径失效。"
+}
+
+
 # --- 主循环 ---
 while true; do
     clear
@@ -173,15 +208,17 @@ while true; do
     echo "1) 🚀 修复/初始化仓库与环境"
     echo "2) 🔗 生成软链接与映射指令"
     echo "3) 📦 模型入库 (显示指令/自动搬运)"
-    echo "4) 🗑️  生成卸载指令"
+	echo "4) 🐳 生成 DGX 优化 Docker 启动指令"
+    echo "5) 🗑️ 生成卸载指令"
     echo "q) 退出"
     read -p ">>> " MAIN_OPT
 
     case $MAIN_OPT in
-        1) init_vault; read -p "按回车返回...";;
+		1) init_vault; read -p "按回车返回...";;
         2) generate_mapping; read -p "按回车返回...";;
         3) import_model; read -p "按回车返回...";;
-        4) generate_uninstall_cmd; read -p "按回车返回...";;
+        4) generate_docker_template; read -p "按回车返回...";;
+        5) generate_uninstall_cmd; read -p "按回车返回...";;
         q) echo "再见！"; exit 0;;
         *) echo "无效选择"; sleep 1;;
     esac
