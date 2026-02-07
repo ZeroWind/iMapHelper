@@ -1,3 +1,5 @@
+![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)
+![Status: Public Domain](https://img.shields.io/badge/status-Public%20Domain-green.svg)
 # 🚀 iMap-Helper (v0.04)
 ### AI Inference Model Centralized Management Toolkit
 
@@ -83,3 +85,4 @@ Designed for AI Researchers and Beginners. 🚀
 
 
 ![iMap-Helper](https://github.com/user-attachments/assets/1cc1a496-1384-4800-95d9-3d1ce34d67c5) 
+
