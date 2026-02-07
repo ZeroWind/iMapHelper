@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# --- Configuration: Your centralized storage root ---
+# --- Configuration: Your centralized storage root  ---
 VAULT="/mnt/models"
 
 # Color Definitions
