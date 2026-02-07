@@ -93,5 +93,5 @@ docker run --gpus all \
 * **权限位 (GID)**：脚本对目录设置了 `s` 位权限，确保不同用户、不同容器产生的新模型文件都能被属组内的成员共同读写，避免了 Linux 权限冲突。
 * **卸载: 生成指令, 复制到终端执行**
 
-![Flowchart](./ai_model_map_helper.png)
+![Flowchart](https://raw.githubusercontent.com/ZeroWind/iMapHelper/refs/heads/main/ai_model_map_helper.png)
 ---
