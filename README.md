@@ -81,8 +81,5 @@ To maintain system safety, this script **never** runs `rm -rf` directly. Selecti
 
 Designed for AI Researchers and Beginners. 🚀
 
-```
-
-
 
 ![iMap-Helper](https://github.com/user-attachments/assets/1cc1a496-1384-4800-95d9-3d1ce34d67c5) 
