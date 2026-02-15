@@ -88,6 +88,7 @@ init_vault() {
     # 注入环境变量
     if ! grep -q "HF_HOME" ~/.bashrc; then
         echo -e "\n# AI Model Cache Redirect\nexport HF_HOME=\"$VAULT/cache\"\nexport MODELSCOPE_CACHE=\"$VAULT/cache\"" >> ~/.bashrc
+		# 在 .bashrc 中注入 ModelScope 的路径变量
         echo -e "${GREEN}✅ 环境变量已注入 ~/.bashrc${NC}"
     fi
     echo -e "${GREEN}✅ 初始化完成。请执行刷新指令: source ~/.bashrc${NC}"
@@ -195,6 +196,7 @@ generate_uninstall_cmd() {
         echo "sudo rm -rf \"$CURRENT_VAULT\""
         
         echo -e "\n# 2. 清理环境变量"
+		echo "sed -i '/# AI Model Cache Redirect/d' ~/.bashrc"
         echo "sed -i '/HF_HOME/d' ~/.bashrc && sed -i '/MODELSCOPE_CACHE/d' ~/.bashrc"
         
         echo -e "\n# 3. 刷新环境"

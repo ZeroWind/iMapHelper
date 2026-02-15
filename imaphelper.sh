@@ -231,7 +231,9 @@ while true; do
         5) 
             echo -e "\n${RED}To uninstall, run these manually:${NC}"
             echo "sudo rm -rf \"$VAULT\""
+			echo "sed -i '/# AI Model Cache Redirect/d' ~/.bashrc"
             echo "sed -i '/HF_HOME/d' ~/.bashrc"
+			echo "sed -i '/MODELSCOPE_CACHE/d' ~/.bashrc"
             read -p "Press Enter..."
             ;;
         q) exit 0;;
